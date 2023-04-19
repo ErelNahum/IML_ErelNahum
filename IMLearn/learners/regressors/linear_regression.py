@@ -52,7 +52,7 @@ class LinearRegression(BaseEstimator):
         """
         m, d = np.shape(X)
         if self.include_intercept_:
-            X = np.c_(np.ones(m), X)
+            X = np.c_[np.ones(m), X]
         self.coefs_ = pinv(X) @ y
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
@@ -71,7 +71,7 @@ class LinearRegression(BaseEstimator):
         """
         m, d = np.shape(X)
         if self.include_intercept_:
-            X = np.c_(np.ones(m), X)
+            X = np.c_[np.ones(m), X]
         return X @ self.coefs_
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
