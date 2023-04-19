@@ -17,7 +17,8 @@ def mean_square_error(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     MSE of given predictions
     """
     array_of_errors = (y_true - y_pred)**2
-    return np.mean(array_of_errors).item()
+    mean = np.mean(array_of_errors)
+    return mean.item() if isinstance(mean, np.ndarray) else mean
 
 
 def misclassification_error(y_true: np.ndarray, y_pred: np.ndarray, normalize: bool = True) -> float:
