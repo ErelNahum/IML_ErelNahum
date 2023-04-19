@@ -34,7 +34,7 @@ def split_train_test(X: pd.DataFrame, y: pd.Series, train_proportion: float = .7
 
     """
     train_X = X.sample(frac=train_proportion)
-    test_X = X - train_X
+    test_X = X.loc[X.index.difference(train_X.index)]
     train_y = y.loc[train_X.index]
     test_y = y.loc[test_X.index]
 
