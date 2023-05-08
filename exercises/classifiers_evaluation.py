@@ -38,14 +38,24 @@ def run_perceptron():
     """
     for n, f in [("Linearly Separable", "linearly_separable.npy"), ("Linearly Inseparable", "linearly_inseparable.npy")]:
         # Load dataset
-        raise NotImplementedError()
+        X, y = load_dataset('../datasets/' + f)
 
         # Fit Perceptron and record loss in each fit iteration
         losses = []
-        raise NotImplementedError()
+
+        def stage_loss(fitted_model, temp, temp2):
+            losses.append(fitted_model.loss(X, y))
+
+        Perceptron(callback=stage_loss).fit(X,y)
 
         # Plot figure of loss as function of fitting iteration
-        raise NotImplementedError()
+        fig = go.Figure(data=go.Scatter(x=list(range(len(losses))), y=losses, mode='lines+markers'),
+                        layout=go.Layout(
+                            xaxis_title= 'Iteration',
+                            yaxis_title= 'Misclassification Error',
+                            title= f'{n} Dataset - Misclassification Error as function of Iteration'
+                        ))
+        fig.show()
 
 
 def get_ellipse(mu: np.ndarray, cov: np.ndarray):
