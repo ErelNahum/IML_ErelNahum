@@ -89,25 +89,42 @@ def compare_gaussian_classifiers():
     """
     for f in ["gaussian1.npy", "gaussian2.npy"]:
         # Load dataset
-        raise NotImplementedError()
+        X, y = load_dataset('../datasets/' + f)
 
         # Fit models and predict over training set
-        raise NotImplementedError()
+        naive_fitter = GaussianNaiveBayes().fit(X, y)
+        lda_fitter = LDA().fit(X, y)
+
+        naive_prediction = naive_fitter.predict(X)
+        lda_prediction = lda_fitter.predict(X)
 
         # Plot a figure with two suplots, showing the Gaussian Naive Bayes predictions on the left and LDA predictions
         # on the right. Plot title should specify dataset used and subplot titles should specify algorithm and accuracy
         # Create subplots
         from IMLearn.metrics import accuracy
-        raise NotImplementedError()
+        fig = make_subplots(1, 2, subplot_titles=(f'Gaussian Naive Bayes({accuracy(y, naive_prediction)})', f'LDA({accuracy(y, lda_prediction)})'))
 
         # Add traces for data-points setting symbols and colors
-        raise NotImplementedError()
+        bayes_scatter = go.Scatter(x=X[:, 0], y=X[:, 1], mode='markers',
+                                   marker=dict(color=naive_prediction, symbol=class_symbols[y]))
+        lda_scatter = go.Scatter(x=X[:, 0], y=X[:, 1], mode='markers',
+                                 marker=dict(color=lda_prediction, symbol=class_symbols[y]))
+        fig.add_traces([bayes_scatter, lda_scatter], rows=[1, 1], cols=[1, 2])
 
         # Add `X` dots specifying fitted Gaussians' means
-        raise NotImplementedError()
+        bayes_x = go.Scatter(x=naive_fitter.mu_[:, 0], y=naive_fitter.mu_[:, 1], mode='markers',
+                             marker=dict(color='black', symbol='x', size=10))
+        lda_x = go.Scatter(x=lda_fitter.mu_[:, 0], y=lda_fitter.mu_[:, 1], mode='markers',
+                           marker=dict(color='black', symbol='x', size=10))
+        fig.add_traces([bayes_x, lda_x], rows=[1, 1], cols=[1, 2])
 
         # Add ellipses depicting the covariances of the fitted Gaussians
-        raise NotImplementedError()
+        for i in range(len(naive_fitter.classes_)):
+            fig.add_traces([get_ellipse(naive_fitter.mu_[i], np.diag(naive_fitter.vars_[i])),
+                            get_ellipse(lda_fitter.mu_[i], lda_fitter.cov_)], rows=[1, 1], cols=[1, 2])
+
+        fig.update_layout(title_text=f'Gaussian Classifiers Comparison ({f})', showlegend=False)
+        fig.show()
 
 
 if __name__ == '__main__':
