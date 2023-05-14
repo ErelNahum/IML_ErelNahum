@@ -46,7 +46,16 @@ class LDA(BaseEstimator):
         y : ndarray of shape (n_samples, )
             Responses of input data to fit to
         """
-        raise NotImplementedError()
+        self.classes_, self.pi_ = np.unique(y, return_counts=True)
+        self.pi_ /= len(y)
+        self.mu_ = np.array([np.mean(X[y==yi], axis=0) for yi in self.classes_])
+        for k in self.classes_:
+            indices = np.array([i for i in range(len(y)) if y[i] == k])
+            sum = 0
+            for i in indices:
+                sum += (X[i] - self.mu_[k])**2
+            self.cov_[k] = sum / len(indices)
+        self._cov_inv = inv(self.cov_)
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
         """
@@ -62,7 +71,7 @@ class LDA(BaseEstimator):
         responses : ndarray of shape (n_samples, )
             Predicted responses of given samples
         """
-        raise NotImplementedError()
+        return self.classes_[np.argmax(self.likelihood(X), axis=1)]
 
     def likelihood(self, X: np.ndarray) -> np.ndarray:
         """
@@ -82,7 +91,18 @@ class LDA(BaseEstimator):
         if not self.fitted_:
             raise ValueError("Estimator must first be fitted before calling `likelihood` function")
 
-        raise NotImplementedError()
+        Z = np.sqrt((2 * np.pi) ** X.shape[1] * np.linalg.det(self.cov_))
+        # X: m x 1 x d      mu: k X d
+        # X - mu: m x k x d
+        p = X[:, np.newaxis, :] - self.mu_
+        r = np.zeros(p.shape[0], p.shape[1])
+        for i in np.arange(p.shape[0]):
+            for k in np.arange(p.shape[1]):
+                d = p[i, k, :]
+                r[i, k] = self.pi_[k] / Z * np.exp(-.5 * d.T @ self._cov_inv @ d)
+        print(r.shape)
+        return r
+
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
         """
@@ -102,4 +122,4 @@ class LDA(BaseEstimator):
             Performance under missclassification loss function
         """
         from ...metrics import misclassification_error
-        raise NotImplementedError()
+        return misclassification_error(self._predict(X), y)
