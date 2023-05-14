@@ -41,8 +41,8 @@ class GaussianNaiveBayes(BaseEstimator):
         """
         self.classes_, self.pi_ = np.unique(y, return_counts=True)
         self.pi_ = self.pi_ / y.shape[0]
-        self.mu_ = np.array([np.mean(X[y == c]) for c in self.classes_])
-        self.vars_ = np.array([np.var(X[y == c], ddof=1) for c in self.classes_])
+        self.mu_ = np.array([np.mean(X[y == c], axis=0) for c in self.classes_])
+        self.vars_ = np.array([np.var(X[y == c], ddof=1, axis=0) for c in self.classes_])
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
         """
@@ -58,7 +58,7 @@ class GaussianNaiveBayes(BaseEstimator):
         responses : ndarray of shape (n_samples, )
             Predicted responses of given samples
         """
-        return self.classes_[np.argmax(self.likelihood(X),axis=1)]
+        return self.classes_[np.argmax(self.likelihood(X), axis=1)]
 
     def likelihood(self, X: np.ndarray) -> np.ndarray:
         """
