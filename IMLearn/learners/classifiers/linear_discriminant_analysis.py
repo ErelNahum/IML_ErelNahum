@@ -47,14 +47,10 @@ class LDA(BaseEstimator):
             Responses of input data to fit to
         """
         self.classes_, self.pi_ = np.unique(y, return_counts=True)
-        self.pi_ /= len(y)
-        self.mu_ = np.array([np.mean(X[y==yi], axis=0) for yi in self.classes_])
-        for k in self.classes_:
-            indices = np.array([i for i in range(len(y)) if y[i] == k])
-            sum = 0
-            for i in indices:
-                sum += (X[i] - self.mu_[k])**2
-            self.cov_[k] = sum / len(indices)
+        self.pi_ = self.pi_ / y.shape[0]
+        self.mu_ = np.array([np.mean(X[y == yi], axis=0) for yi in self.classes_])
+        d = X - self.mu_[y.astype(int)]
+        self.cov_ = np.einsum('ki,kj->ij', d, d) / (X.shape[0] - len(self.classes_))
         self._cov_inv = inv(self.cov_)
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
@@ -95,7 +91,7 @@ class LDA(BaseEstimator):
         # X: m x 1 x d      mu: k X d
         # X - mu: m x k x d
         p = X[:, np.newaxis, :] - self.mu_
-        r = np.zeros(p.shape[0], p.shape[1])
+        r = np.zeros((p.shape[0], p.shape[1]))
         for i in np.arange(p.shape[0]):
             for k in np.arange(p.shape[1]):
                 d = p[i, k, :]
