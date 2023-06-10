@@ -111,13 +111,13 @@ class DecisionStump(BaseEstimator):
         labels = labels[sorted_indices]
 
         # Calculating loss for every threshold
-        loss_lower_thresh = len(labels[labels != sign])
+        loss_lower_thresh = np.sum(np.abs(labels)[np.sign(labels) != sign])
         loss_inside = loss_lower_thresh + np.cumsum(labels * sign)
-        loss = np.concatenate(loss_lower_thresh, loss_inside)
+        loss = np.concatenate(([loss_lower_thresh], loss_inside))
 
         # Picking best threshold
         best_thresh_index = np.argmin(loss)
-        return np.concatenate([values, np.inf])[best_thresh_index], loss[best_thresh_index]
+        return np.concatenate(([-np.inf], values[1:], [np.inf]))[best_thresh_index], loss[best_thresh_index]
 
 
 
